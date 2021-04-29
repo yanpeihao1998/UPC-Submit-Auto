@@ -3,6 +3,9 @@ import requests
 import json
 import lxml.html
 import re
+import smtplib
+from email.mime.text import MIMEText
+from email.header import Header
 
 signIn = {'username': os.environ["USERNAME"], #学号
           'password': os.environ["PASSWORD"]} #登陆密码
@@ -60,4 +63,28 @@ saveResponse = conn.post(
 )
 
 saveJson = json.loads(saveResponse.text)
+
+# 第三方 SMTP 服务
+mail_host = "smtp.qq.com"  # 设置服务器
+mail_user = "2819237058@qq.com"  # 用户名
+mail_pass = "lyimhkqaudcudfbd"  # 口令
+
+sender = '2819237058@qq.com'
+receivers = ['1659070839@qq.com']  # 接收邮件，可设置为你的QQ邮箱或者其他邮箱
+
+message = MIMEText(saveJson['m'], 'plain', 'utf-8')
+message['From'] = Header("疫情防控通填报通知", 'utf-8')
+message['To'] = Header("测试", 'utf-8')
+
+subject = '疫情防控通'
+message['Subject'] = Header(subject, 'utf-8')
+
+try:
+    smtpObj = smtplib.SMTP()
+    smtpObj.connect(mail_host, 25)  # 25 为 SMTP 端口号
+    smtpObj.login(mail_user, mail_pass)
+    smtpObj.sendmail(sender, receivers, message.as_string())
+    print("邮件发送成功")
+except smtplib.SMTPException:
+    print("Error: 无法发送邮件")
 print(saveJson['m'])
